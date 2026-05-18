@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>somewhite</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #03030a;
+  --surface: oklch(0.12 0.02 265);
+  --accent: oklch(0.68 0.24 25);
+  --accent-glow: oklch(0.68 0.24 25 / 0.35);
+  --text: oklch(0.90 0 0);
+  --text-muted: oklch(0.58 0.02 265);
+  --radius: 2px;
+  --spacing: clamp(1rem, 4vw, 3rem);
+  --font-size-base: 16px;
+  --font-size-scale: 1;
+  --particle-opacity: 0.7;
+  --nebula-opacity: 0.5;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: calc(var(--font-size-base) * var(--font-size-scale));
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Nebula ── */
+.nebula {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: var(--nebula-opacity);
+}
+.nebula-1 {
+  background: radial-gradient(ellipse 55% 45% at 15% 25%, oklch(0.42 0.07 258 / 0.3), transparent 65%),
+              radial-gradient(ellipse 35% 40% at 85% 65%, oklch(0.40 0.06 285 / 0.22), transparent 60%),
+              radial-gradient(ellipse 25% 30% at 50% 50%, oklch(0.38 0.04 240 / 0.12), transparent 55%);
+  animation: nebulaBreath 20s ease-in-out infinite;
+}
+.nebula-2 {
+  background: radial-gradient(ellipse 40% 35% at 75% 15%, oklch(0.38 0.05 270 / 0.18), transparent 60%),
+              radial-gradient(ellipse 30% 38% at 10% 60%, oklch(0.42 0.05 290 / 0.16), transparent 60%);
+  animation: nebulaBreath 25s ease-in-out infinite reverse;
+}
+@keyframes nebulaBreath {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(1.5%, -1%) scale(1.04); opacity: 0.8; }
+  66% { transform: translate(-1%, 1.5%) scale(0.96); opacity: 1.1; }
+}
+
+.vignette {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, oklch(0.015 0.01 260 / 0.85) 95%);
+}
+
+/* ── Shooting stars ── */
+.shooting-star {
+  position: fixed; z-index: 0; pointer-events: none;
+  width: 2px; height: 100px;
+  background: linear-gradient(to bottom, transparent, oklch(0.95 0 0), transparent);
+  opacity: 0;
+  animation: shoot var(--dur, 4s) var(--delay, 0s) ease-in infinite;
+}
+.shooting-star:nth-child(1) { top: 8%; left: 20%; --dur: 4.5s; --delay: 0s; }
+.shooting-star:nth-child(2) { top: 30%; left: 60%; --dur: 5.5s; --delay: 3s; }
+.shooting-star:nth-child(3) { top: 15%; left: 75%; --dur: 4s; --delay: 6s; }
+.shooting-star:nth-child(4) { top: 45%; left: 40%; --dur: 6s; --delay: 1s; }
+.shooting-star:nth-child(5) { top: 5%; left: 50%; --dur: 5s; --delay: 8s; }
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(0, 0) rotate(-35deg); }
+  4% { opacity: 1; }
+  12% { opacity: 0; transform: translate(-250px, 250px) rotate(-35deg); }
+  100% { opacity: 0; transform: translate(-250px, 250px) rotate(-35deg); }
+}
+
+canvas#starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: var(--particle-opacity); }
+
+main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 var(--spacing); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: calc(var(--spacing) * 3) 0;
+  position: relative;
+}
+
+/* Orbital ring behind hero */
+.orbital-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotateX(75deg) rotateZ(-15deg);
+  width: min(70vw, 500px);
+  height: min(70vw, 500px);
+  border-radius: 50%;
+  border: 1px solid oklch(0.68 0.24 25 / 0.18);
+  pointer-events: none;
+  animation: orbitSpin 30s linear infinite;
+  z-index: -1;
+}
+.orbital-ring::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow), 0 0 40px var(--accent-glow);
+  transform: translateX(-50%);
+}
+.orbital-ring-2 {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotateX(70deg) rotateZ(45deg);
+  width: min(55vw, 400px);
+  height: min(55vw, 400px);
+  border-radius: 50%;
+  border: 1px solid oklch(0.50 0.12 260 / 0.12);
+  pointer-events: none;
+  animation: orbitSpin 22s linear infinite reverse;
+  z-index: -1;
+}
+.orbital-ring-2::after {
+  content: '';
+  position: absolute;
+  top: -2px; right: 30%;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: oklch(0.55 0.12 260);
+  box-shadow: 0 0 12px oklch(0.55 0.12 260 / 0.5);
+}
+@keyframes orbitSpin {
+  to { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(345deg); }
+}
+
+.hero-eyebrow {
+  font-family: 'Space Grotesk', monospace;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  text-transform: uppercase; letter-spacing: 0.3em;
+  color: var(--accent); margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 1s 0.2s ease forwards;
+}
+
+.hero-name {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-weight: 700; line-height: 0.95; letter-spacing: -0.03em;
+  color: var(--text);
+  opacity: 0; animation: fadeUp 1s 0.35s ease forwards;
+  text-shadow: 0 0 100px oklch(0.68 0.24 25 / 0.12);
+}
+
+.hero-name .accent {
+  color: var(--accent); display: inline-block;
+  transition: transform var(--transition);
+  text-shadow: 0 0 70px var(--accent-glow);
+}
+.hero-name .accent:hover { transform: translateY(-4px); }
+
+.hero-role {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 400; color: var(--text-muted);
+  margin-top: 1.5rem; max-width: 28ch;
+  opacity: 0; animation: fadeUp 1s 0.5s ease forwards;
+}
+
+.hero-line {
+  width: clamp(60px, 10vw, 120px); height: 1px;
+  background: var(--accent); margin-top: 2rem;
+  opacity: 0; animation: fadeUp 1s 0.65s ease forwards;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.scroll-hint {
+  position: absolute; bottom: 2rem; left: 0;
+  display: flex; align-items: center; gap: 0.75rem;
+  color: var(--text-muted); font-size: 0.75rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  opacity: 0; animation: fadeUp 1s 0.8s ease forwards;
+}
+.scroll-hint::after {
+  content: ''; width: 1px; height: 32px;
+  background: var(--text-muted);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ── Sections ── */
+.section {
+  padding: calc(var(--spacing) * 4) 0;
+  border-top: 1px solid oklch(0.16 0.02 265);
+}
+
+.section-label {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.2em; color: var(--accent); margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600; line-height: 1.1;
+  letter-spacing: -0.02em; margin-bottom: 1.5rem;
+}
+
+/* ── About ── */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: calc(var(--spacing) * 2); align-items: start;
+}
+.about-text {
+  color: var(--text-muted);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.8; text-wrap: pretty;
+}
+.about-meta { display: flex; flex-direction: column; gap: 1.5rem; }
+.meta-item { padding: 1.25rem 0; border-bottom: 1px solid oklch(0.14 0.02 265); }
+.meta-label {
+  font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 0.5rem;
+}
+.meta-value {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.125rem; font-weight: 500; color: var(--text);
+}
+
+/* ── Skills ── */
+.skills-cloud { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.skill-tag {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.8125rem; padding: 0.5rem 1rem;
+  border: 1px solid oklch(0.18 0.02 265); border-radius: var(--radius);
+  color: var(--text-muted); background: transparent;
+  cursor: default; transition: all var(--transition);
+}
+.skill-tag:hover {
+  color: var(--text); border-color: var(--accent);
+  background: oklch(0.68 0.24 25 / 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* ── Contact constellation ── */
+.contact-section-inner { position: relative; }
+
+.contact-icons {
+  display: flex; flex-wrap: wrap; gap: 2rem;
+  padding: 1rem 0 1.5rem;
+  position: relative; z-index: 1;
+}
+
+.contact-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 80px; height: 80px;
+  border: 1px solid oklch(0.18 0.02 265); border-radius: var(--radius);
+  color: var(--text-muted); text-decoration: none; cursor: pointer;
+  position: relative; transition: all var(--transition);
+  background: transparent; outline: none;
+}
+.contact-icon svg {
+  width: 30px; height: 30px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  transition: all var(--transition);
+}
+/* Special: filled icons */
+.contact-icon svg.filled-icon { fill: currentColor; stroke: none; }
+
+.contact-icon:hover {
+  color: var(--accent); border-color: var(--accent);
+  background: oklch(0.68 0.24 25 / 0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 0 40px var(--accent-glow), 0 12px 32px oklch(0.68 0.24 25 / 0.15);
+}
+.contact-icon::after {
+  content: attr(aria-label);
+  position: absolute; bottom: -1.75rem; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.625rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+  white-space: nowrap; opacity: 0;
+  transition: opacity var(--transition);
+}
+.contact-icon:hover::after { opacity: 1; }
+
+/* Constellation lines (drawn via pseudo on container) */
+.constellation-lines {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+.copy-toast {
+  position: fixed; top: 2rem; left: 50%; transform: translateX(-50%);
+  z-index: 200; background: var(--surface);
+  border: 1px solid var(--accent); color: var(--text);
+  padding: 0.6rem 1.5rem; border-radius: 4px;
+  font-size: 0.8125rem; letter-spacing: 0.05em;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.copy-toast.show { opacity: 1; }
+
+/* ── Footer ── */
+.footer {
+  padding: calc(var(--spacing) * 2) 0;
+  border-top: 1px solid oklch(0.16 0.02 265);
+  color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.1em;
+}
+
+/* ── Reveal ── */
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .about-grid { grid-template-columns: 1fr; gap: var(--spacing); }
+  .hero { min-height: 90vh; }
+  .contact-icon { width: 64px; height: 64px; }
+  .contact-icon svg { width: 24px; height: 24px; }
+  .contact-icons { gap: 1.25rem; }
+  .orbital-ring, .orbital-ring-2 { display: none; }
+}
+
+/* ── Tweaks ── */
+.tweaks-toggle {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid oklch(0.22 0.02 265); background: var(--surface);
+  color: var(--text-muted); cursor: pointer;
+  font-family: 'Space Grotesk', monospace; font-size: 0.7rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); backdrop-filter: blur(12px);
+}
+.tweaks-toggle:hover {
+  border-color: var(--accent); color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.tweaks-panel {
+  position: fixed; bottom: 5rem; right: 1.5rem; z-index: 99;
+  width: 260px; background: var(--surface);
+  border: 1px solid oklch(0.16 0.02 265); border-radius: 4px;
+  padding: 1.5rem; backdrop-filter: blur(24px);
+  transform: translateY(8px); opacity: 0; pointer-events: none;
+  transition: all var(--transition);
+}
+.tweaks-panel.open {
+  transform: translateY(0); opacity: 1; pointer-events: auto;
+}
+
+.tweaks-panel h3 {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.6875rem; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 1rem;
+}
+
+.tweak-group { margin-bottom: 1rem; }
+.tweak-group:last-child { margin-bottom: 0; }
+
+.tweak-label {
+  display: block; font-size: 0.7rem; color: var(--text-muted);
+  margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.tweak-input { width: 100%; height: 2px; accent-color: var(--accent); cursor: pointer; }
+
+.tweak-select {
+  width: 100%; padding: 0.4rem 0.6rem;
+  background: var(--bg); border: 1px solid oklch(0.18 0.02 265);
+  border-radius: 2px; color: var(--text);
+  font-size: 0.75rem; cursor: pointer; font-family: inherit;
+}
+
+/* -- Retro terminal redesign -- */
+:root {
+  --bg: #07110b;
+  --surface: #0d1a10;
+  --surface-2: #122718;
+  --accent: #f4c86a;
+  --accent-glow: rgba(244, 200, 106, 0.38);
+  --green: #73ff9b;
+  --green-dim: rgba(115, 255, 155, 0.48);
+  --text: #f3f0d2;
+  --text-muted: #9eb58f;
+  --line: rgba(244, 200, 106, 0.28);
+  --radius: 0;
+  --mono: "Courier New", "Lucida Console", "Consolas", monospace;
+  --transition: 0.22s steps(4, end);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(115, 255, 155, 0.15), transparent 32rem),
+    radial-gradient(circle at 82% 70%, rgba(244, 200, 106, 0.13), transparent 26rem),
+    linear-gradient(135deg, #040805 0%, #0a160d 46%, #020402 100%);
+  color: var(--text);
+  font-family: var(--mono);
+  text-shadow: 0 0 10px rgba(115, 255, 155, 0.12);
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+body::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, rgba(255,0,0,0.035), rgba(0,255,70,0.025), rgba(0,90,255,0.035));
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+body::after {
+  background:
+    radial-gradient(ellipse at center, transparent 44%, rgba(0,0,0,0.62) 100%),
+    repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.025) 0 1px, transparent 1px 7px);
+}
+
+.nebula,
+.shooting-star,
+canvas#starfield,
+.orbital-ring,
+.orbital-ring-2,
+.constellation-lines,
+.tweaks-toggle,
+.tweaks-panel {
+  display: none !important;
+}
+
+.crt-shell {
+  max-width: min(1240px, calc(100vw - 2rem));
+  padding-inline: clamp(0.75rem, 2.4vw, 1.5rem);
+}
+
+.crt-shell::before {
+  content: "SOMEWHITE OS / PERSONAL TERMINAL";
+  display: block;
+  margin-top: clamp(0.75rem, 2vw, 1.5rem);
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  color: var(--green);
+  background: linear-gradient(90deg, rgba(115,255,155,0.12), rgba(244,200,106,0.08));
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 28px rgba(115, 255, 155, 0.11);
+}
+
+.hero,
+.section,
+.footer {
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(13, 26, 16, 0.86), rgba(5, 12, 7, 0.88)),
+    repeating-linear-gradient(90deg, rgba(244,200,106,0.035) 0 1px, transparent 1px 22px);
+  box-shadow:
+    inset 0 0 0 1px rgba(115,255,155,0.08),
+    0 0 48px rgba(0,0,0,0.45),
+    0 0 42px rgba(115,255,155,0.08);
+}
+
+.hero {
+  min-height: min(92vh, 860px);
+  margin-bottom: clamp(1.25rem, 3.5vw, 2.6rem);
+  padding: clamp(4.4rem, 12vw, 8.5rem) clamp(1.6rem, 5.5vw, 5rem);
+}
+
+.hero::before {
+  content: "READY.";
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: var(--green);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  animation: terminalBlink 1.2s steps(2, end) infinite;
+}
+
+.hero-eyebrow,
+.section-label {
+  color: var(--green);
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+}
+
+.hero-eyebrow::before,
+.section-label::before {
+  content: "> ";
+  color: var(--accent);
+}
+
+.hero-name,
+.section-title,
+.meta-value {
+  font-family: var(--mono);
+  letter-spacing: 0;
+}
+
+.hero-name {
+  font-size: clamp(2.6rem, 9vw, 6.7rem);
+  color: var(--text);
+  text-shadow: 0 0 16px rgba(244,200,106,0.25), 2px 0 rgba(115,255,155,0.18), -2px 0 rgba(255,80,40,0.12);
+}
+
+.hero-name .accent,
+.section-title {
+  color: var(--accent);
+}
+
+.hero-role,
+.about-text,
+.meta-label,
+.skill-tag,
+.footer {
+  color: var(--text-muted);
+}
+
+.hero-line {
+  width: min(420px, 72vw);
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 12px, transparent 12px 20px);
+}
+
+.scroll-hint {
+  left: clamp(1.25rem, 5vw, 4rem);
+  color: var(--green);
+}
+
+.section {
+  margin-block: clamp(1.25rem, 3.5vw, 2.6rem);
+  padding: clamp(2.8rem, 7vw, 5.25rem) clamp(1.6rem, 5.5vw, 5rem);
+}
+
+.about-grid {
+  gap: clamp(1.5rem, 5vw, 3rem);
+}
+
+.meta-item,
+.footer {
+  border-color: var(--line);
+}
+
+.skill-tag {
+  border-color: var(--line);
+  background: rgba(3, 8, 5, 0.48);
+  box-shadow: inset 0 -2px 0 rgba(244,200,106,0.12);
+}
+
+.skill-tag:hover {
+  color: #07110b;
+  background: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.contact-section-inner {
+  min-height: clamp(640px, 58vw, 760px);
+  margin-top: 1.4rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(rgba(115,255,155,0.07), transparent 42%),
+    repeating-linear-gradient(90deg, rgba(244,200,106,0.035) 0 1px, transparent 1px 58px),
+    rgba(3, 8, 5, 0.5);
+  cursor: default;
+}
+
+.contact-section-inner::before {
+  content: "";
+  position: absolute;
+  top: 52px;
+  left: clamp(32px, 6vw, 76px);
+  right: clamp(32px, 6vw, 76px);
+  height: 12px;
+  border: 1px solid var(--accent);
+  background: linear-gradient(180deg, #f9da8a, #875f22);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.32), 0 0 26px var(--accent-glow);
+  z-index: 1;
+}
+
+.contact-icons.hanging-rig {
+  display: block;
+  height: 100%;
+  min-height: inherit;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+}
+
+.hanger {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: var(--tag-w, 112px);
+  height: var(--tag-h, 118px);
+  transform: translate3d(var(--x, 0px), var(--y, 0px), 0);
+  will-change: transform;
+}
+
+.hanger-line {
+  position: absolute;
+  left: var(--line-x, 0px);
+  top: var(--line-y, 0px);
+  z-index: 1;
+  width: 2px;
+  height: var(--line-h, 118px);
+  transform-origin: 50% 0;
+  transform: translateX(-1px) rotate(var(--line-rot, 0deg));
+  background: linear-gradient(180deg, rgba(244,200,106,0.9), rgba(115,255,155,0.42));
+  box-shadow: 0 0 10px rgba(244,200,106,0.26);
+  pointer-events: none;
+}
+
+.hanger-line::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  transform: translateX(-50%);
+  border: 1px solid var(--accent);
+  background: #08110a;
+}
+
+.hanger .contact-icon {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 42px auto 18px;
+  place-items: center;
+  gap: 0.35rem;
+  padding: 0.95rem 0.65rem 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(244,200,106,0.15), rgba(7,17,11,0.96)),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 5px);
+  color: var(--text);
+  box-shadow: 0 14px 26px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(115,255,155,0.12);
+  cursor: grab;
+  transform: rotate(var(--rot, 0deg));
+  transform-origin: 50% 14px;
+  transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.hanger .contact-icon:hover {
+  transform: rotate(var(--rot, 0deg));
+}
+
+.hanger .contact-icon::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%);
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: #07110b;
+}
+
+.hanger .contact-icon::after {
+  content: attr(aria-label);
+  position: static;
+  transform: none;
+  opacity: 1;
+  color: var(--green);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+}
+
+.hanger.dragging {
+  z-index: 5;
+}
+
+.hanger.dragging .contact-icon {
+  cursor: grabbing;
+  color: var(--accent);
+  box-shadow: 0 22px 38px rgba(0,0,0,0.45), 0 0 28px var(--accent-glow);
+}
+
+.contact-icon svg {
+  width: 34px;
+  height: 34px;
+  color: currentColor;
+  pointer-events: none;
+}
+
+.official-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  image-rendering: auto;
+  padding: 4px;
+  border: 1px solid rgba(244,200,106,0.38);
+  background: rgba(243, 240, 210, 0.9);
+  box-shadow: 0 0 10px rgba(244,200,106,0.16);
+  pointer-events: none;
+}
+
+.wechat-logo {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border: 1px solid rgba(244,200,106,0.38);
+  background: rgba(243, 240, 210, 0.9);
+  box-shadow: 0 0 10px rgba(244,200,106,0.16);
+  pointer-events: none;
+}
+
+.contact-icon .badge-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid currentColor;
+  color: currentColor;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.contact-icon .social-id {
+  max-width: 100%;
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.contact-icon.is-placeholder {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.copy-toast {
+  background: #07110b;
+  border-color: var(--accent);
+  color: var(--green);
+  font-family: var(--mono);
+  box-shadow: 0 0 28px rgba(115,255,155,0.18);
+}
+
+@keyframes terminalBlink {
+  50% { opacity: 0.32; }
+}
+
+@media (max-width: 768px) {
+  .crt-shell {
+    padding-inline: 0.85rem;
+  }
+
+  .hero {
+    min-height: 82vh;
+    padding: 4rem 1.15rem;
+  }
+
+  .section {
+    padding: 2rem 1rem;
+  }
+
+  .contact-section-inner {
+    min-height: 760px;
+  }
+
+  .hanger {
+    width: var(--tag-w, 96px);
+    height: var(--tag-h, 106px);
+  }
+
+  .contact-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .nebula, .shooting-star, .orbital-ring, .orbital-ring-2 { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="vignette"></div>
+<div class="shooting-star"></div>
+<div class="shooting-star"></div>
+<div class="shooting-star"></div>
+<div class="shooting-star"></div>
+<div class="shooting-star"></div>
+<canvas id="starfield"></canvas>
+
+<main class="crt-shell">
+  <section class="hero">
+    <div class="orbital-ring"></div>
+    <div class="orbital-ring-2"></div>
+    <p class="hero-eyebrow">Personal Site</p>
+    <h1 class="hero-name">
+      <span class="accent">你好，</span><br>我是 somewhite
+    </h1>
+    <p class="hero-role">
+      自由职业者 / 创造者 / 生活在武汉
+    </p>
+    <div class="hero-line"></div>
+    <div class="scroll-hint">向下滚动</div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="reveal">
+      <p class="section-label">关于我</p>
+      <div class="about-grid">
+        <p class="about-text">
+          热爱技术与设计的交叉点，专注于创造简洁、好用的数字产品。相信好的工具能改变人们的工作方式，正在这条路上不断探索。
+        </p>
+        <div class="about-meta">
+          <div class="meta-item">
+            <p class="meta-label">所在地</p>
+            <p class="meta-value">湖北，武汉</p>
+          </div>
+          <div class="meta-item">
+            <p class="meta-label">当前状态</p>
+            <p class="meta-value">自由职业</p>
+          </div>
+          <div class="meta-item">
+            <p class="meta-label">邮箱</p>
+            <p class="meta-value">somewhite1210@gmail.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="skills">
+    <div class="reveal">
+      <p class="section-label">技能 & 兴趣</p>
+      <h2 class="section-title">擅长与热爱的<br>交汇之处</h2>
+      <div class="skills-cloud">
+        <span class="skill-tag">JavaScript</span>
+        <span class="skill-tag">TypeScript</span>
+        <span class="skill-tag">React</span>
+        <span class="skill-tag">Node.js</span>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">UI/UX Design</span>
+        <span class="skill-tag">Figma</span>
+        <span class="skill-tag">Git</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="reveal">
+      <p class="section-label">联系</p>
+      <h2 class="section-title">找到我</h2>
+      <div class="contact-section-inner">
+        <div class="contact-icons" id="contactIcons">
+          <!-- GitHub -->
+          <a href="https://github.com/somewhite" target="_blank" rel="noopener" class="contact-icon" aria-label="GitHub">
+            <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </a>
+
+          <!-- Bilibili - TV/display with face -->
+          <a href="https://space.bilibili.com/341994935" target="_blank" rel="noopener" class="contact-icon" aria-label="Bilibili">
+            <svg viewBox="0 0 24 24" class="filled-icon">
+              <rect x="3" y="5" width="18" height="14" rx="3" fill="currentColor"/>
+              <circle cx="8" cy="10" r="1.8" fill="var(--bg)"/>
+              <circle cx="16" cy="10" r="1.8" fill="var(--bg)"/>
+              <path d="M7 14.5c1.2 0.8 2.8 1.2 5 1.2s3.8-0.4 5-1.2" stroke="var(--bg)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <rect x="10" y="2" width="4" height="3" rx="1" fill="currentColor"/>
+            </svg>
+          </a>
+
+          <!-- Email -->
+          <a href="mailto:somewhite1210@gmail.com" class="contact-icon" aria-label="Email">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 4-10 8L2 4"/></svg>
+          </a>
+
+          <!-- WeChat - two overlapping speech bubbles -->
+          <button class="contact-icon" aria-label="微信" id="wechatBtn" title="点击复制微信号">
+            <svg viewBox="0 0 24 24" class="filled-icon">
+              <path d="M19.5 12.5c0-3.6-3.4-6.5-7.5-6.5S4.5 8.9 4.5 12.5c0 2 1 3.8 2.5 5l-.5 1.8 2.2-1.1c1 .3 2.1.4 3.3.4.3 0 .7 0 1-.1-0.1-.4-0.1-.9-0.1-1.3 0-3 2.7-5.5 6-5.5.3 0 .5 0 .8.1-.1-.1-.1-.2-.2-.3z"/>
+              <path d="M8.5 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM14.5 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+              <path d="M15.5 14c-2.5 0-4.5 1.8-4.5 4s2 4 4.5 4c.6 0 1.2-.1 1.7-.3l1.3.7-.3-1.1c1-.7 1.8-1.8 1.8-3.3 0-2.2-2-4-4.5-4z"/>
+              <circle cx="14" cy="17.5" r=".7" fill="var(--bg)"/>
+              <circle cx="17.5" cy="17.5" r=".7" fill="var(--bg)"/>
+            </svg>
+          </button>
+
+          <!-- X -->
+          <a href="https://x.com/some_white89751" target="_blank" rel="noopener" class="contact-icon" aria-label="X">
+            <svg viewBox="0 0 24 24"><path d="M4 4l6.5 8.8L4 20h1.5l5.2-6.2 4.3 6.2H20l-7-9.3L18 4h-1.5l-4.6 5.6L8 4H4z"/></svg>
+          </a>
+
+          <!-- Xiaohongshu placeholder -->
+          <a href="#" class="contact-icon" aria-label="小红书">
+            <svg viewBox="0 0 24 24" class="filled-icon">
+              <rect x="2" y="2" width="20" height="20" rx="3" fill="currentColor"/>
+              <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="var(--bg)" font-family="system-ui, sans-serif">RED</text>
+            </svg>
+          </a>
+        </div>
+        <canvas class="constellation-lines" id="constellationLines"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer reveal">
+    © 2026 — somewhite
+  </footer>
+</main>
+
+<div class="copy-toast" id="copyToast"></div>
+
+<button class="tweaks-toggle" id="tweaksBtn" aria-label="打开调整面板">◐</button>
+<div class="tweaks-panel" id="tweaksPanel">
+  <h3>Tweaks</h3>
+  <div class="tweak-group">
+    <label class="tweak-label">强调色</label>
+    <select class="tweak-select" id="tweakAccent">
+      <option value="oklch(0.68 0.24 25)">珊瑚橙</option>
+      <option value="oklch(0.65 0.20 160)">薄荷绿</option>
+      <option value="oklch(0.65 0.22 260)">钴蓝</option>
+      <option value="oklch(0.65 0.18 340)">玫瑰红</option>
+    </select>
+  </div>
+  <div class="tweak-group">
+    <label class="tweak-label">星场密度</label>
+    <input type="range" class="tweak-input" id="tweakStars" min="0" max="100" value="60">
+  </div>
+  <div class="tweak-group">
+    <label class="tweak-label">字号缩放</label>
+    <input type="range" class="tweak-input" id="tweakFontScale" min="80" max="120" value="100">
+  </div>
+  <div class="tweak-group">
+    <label class="tweak-label">星云可见度</label>
+    <input type="range" class="tweak-input" id="tweakNebula" min="0" max="100" value="50">
+  </div>
+</div>
+
+<script>
+/* ── 3-layer starfield ── */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let starsL = [], starsM = [], starsS = [];
+let mouseX = -1000, mouseY = -1000;
+let time = 0;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  initStars();
+}
+resize();
+window.addEventListener('resize', resize);
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+function initStars() {
+  const w = canvas.width, h = canvas.height;
+  starsL = Array.from({length: 30}, () => ({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.6+1.2, sp: Math.random()*0.015+0.004, off: Math.random()*Math.PI*2, vx: (Math.random()-0.5)*0.06, vy: (Math.random()-0.5)*0.06 }));
+  starsM = Array.from({length: 100}, () => ({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.7+0.5, sp: Math.random()*0.025+0.008, off: Math.random()*Math.PI*2, vx: (Math.random()-0.5)*0.12, vy: (Math.random()-0.5)*0.12 }));
+  starsS = Array.from({length: 250}, () => ({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*0.45+0.15, sp: Math.random()*0.035+0.01, off: Math.random()*Math.PI*2, vx: (Math.random()-0.5)*0.1, vy: (Math.random()-0.5)*0.1 }));
+}
+
+function draw(timestamp) {
+  time = timestamp;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width, h = canvas.height;
+
+  function layer(arr, alpha) {
+    for (const s of arr) {
+      s.x += s.vx; s.y += s.vy;
+      if (s.x < 0) s.x = w; if (s.x > w) s.x = 0;
+      if (s.y < 0) s.y = h; if (s.y > h) s.y = 0;
+      const tw = 0.5 + 0.5 * Math.sin(time * s.sp + s.off);
+      const a = alpha * (0.55 + 0.45 * tw);
+
+      if (s.r > 1) {
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 5);
+        g.addColorStop(0, `oklch(0.92 0 0 / ${a * 0.6})`);
+        g.addColorStop(1, 'transparent');
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 5, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `oklch(0.92 0 0 / ${a})`; ctx.fill();
+    }
+  }
+
+  layer(starsS, 0.45);
+  layer(starsM, 0.65);
+  layer(starsL, 0.85);
+
+  // Mouse connections
+  for (const s of starsL) {
+    const dx = mouseX - s.x, dy = mouseY - s.y, dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 180) {
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(mouseX, mouseY);
+      ctx.strokeStyle = `oklch(0.68 0.24 25 / ${0.1 * (1 - dist/180)})`;
+      ctx.lineWidth = 0.5; ctx.stroke();
+    }
+  }
+
+  // Nearby star connections (constellation effect)
+  for (let i = 0; i < starsL.length; i++) {
+    for (let j = i+1; j < starsL.length; j++) {
+      const dx = starsL[j].x - starsL[i].x, dy = starsL[j].y - starsL[i].y;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      if (d < 140) {
+        ctx.beginPath(); ctx.moveTo(starsL[i].x, starsL[i].y); ctx.lineTo(starsL[j].x, starsL[j].y);
+        ctx.strokeStyle = `oklch(0.65 0.08 260 / ${0.05 * (1 - d/140)})`;
+        ctx.lineWidth = 0.3; ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+initStars();
+requestAnimationFrame(draw);
+
+/* ── Constellation lines between contact icons ── */
+const constCanvas = document.getElementById('constellationLines');
+const constCtx = constCanvas.getContext('2d');
+
+function drawConstellation() {
+  const container = constCanvas.parentElement;
+  const rect = container.getBoundingClientRect();
+  constCanvas.width = rect.width;
+  constCanvas.height = rect.height;
+
+  const icons = document.querySelectorAll('#contactIcons .contact-icon');
+  const points = [];
+  icons.forEach(icon => {
+    const ir = icon.getBoundingClientRect();
+    points.push({
+      x: ir.left + ir.width/2 - rect.left,
+      y: ir.top + ir.height/2 - rect.top
+    });
+  });
+
+  constCtx.clearRect(0, 0, constCanvas.width, constCanvas.height);
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i+1; j < points.length; j++) {
+      constCtx.beginPath();
+      constCtx.moveTo(points[i].x, points[i].y);
+      constCtx.lineTo(points[j].x, points[j].y);
+      constCtx.strokeStyle = 'oklch(0.40 0.03 265 / 0.25)';
+      constCtx.lineWidth = 0.5;
+      constCtx.setLineDash([2, 6]);
+      constCtx.stroke();
+    }
+  }
+}
+window.addEventListener('load', drawConstellation);
+window.addEventListener('resize', drawConstellation);
+const contactObserver = new MutationObserver(drawConstellation);
+const contactSection = document.getElementById('contact');
+contactObserver.observe(contactSection, { attributes: true, attributeFilter: ['class'] });
+
+/* ── Scroll reveal ── */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      drawConstellation();
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ── WeChat copy ── */
+document.getElementById('wechatBtn').addEventListener('click', async () => {
+  const toast = document.getElementById('copyToast');
+  try {
+    await navigator.clipboard.writeText('somewhite1210');
+    toast.textContent = '微信号已复制：somewhite1210';
+  } catch {
+    toast.textContent = '微信号：somewhite1210';
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+});
+
+/* ── Tweaks ── */
+const tweaksBtn = document.getElementById('tweaksBtn');
+const tweaksPanel = document.getElementById('tweaksPanel');
+let panelOpen = false;
+tweaksBtn.addEventListener('click', () => {
+  panelOpen = !panelOpen;
+  tweaksPanel.classList.toggle('open', panelOpen);
+  tweaksBtn.textContent = panelOpen ? '✕' : '◐';
+});
+
+document.getElementById('tweakAccent').addEventListener('change', function() {
+  const root = document.documentElement;
+  root.style.setProperty('--accent', this.value);
+  root.style.setProperty('--accent-glow', this.value.replace(')', ' / 0.35)'));
+});
+
+document.getElementById('tweakStars').addEventListener('input', function() {
+  document.documentElement.style.setProperty('--particle-opacity', this.value / 100 + 0.1);
+});
+
+document.getElementById('tweakFontScale').addEventListener('input', function() {
+  document.documentElement.style.setProperty('--font-size-scale', this.value / 100);
+});
+
+document.getElementById('tweakNebula').addEventListener('input', function() {
+  document.documentElement.style.setProperty('--nebula-opacity', this.value / 100);
+});
+
+/* -- Hanging social rig -- */
+(() => {
+  const socialItems = [
+    {
+      key: 'github',
+      label: 'GitHub',
+      id: '@somewhite',
+      href: 'https://github.com/somewhite',
+      logo: 'https://github.com/favicon.ico',
+      fallback: 'GH'
+    },
+    {
+      key: 'wechat',
+      label: '微信',
+      id: 'somewhite1210',
+      copy: 'somewhite1210',
+      icon: '<svg class="wechat-logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#07c160"/><path fill="#fff" d="M26.8 18.4c-10.1 0-18.3 6.7-18.3 15 0 4.7 2.7 8.9 6.8 11.6l-1.4 5.1 6.1-3.1c2.1.8 4.4 1.2 6.8 1.2 10.1 0 18.3-6.7 18.3-15s-8.2-14.8-18.3-14.8z"/><path fill="#07c160" d="M20.6 31a2.4 2.4 0 1 1 0-4.8 2.4 2.4 0 0 1 0 4.8zm12.5 0a2.4 2.4 0 1 1 0-4.8 2.4 2.4 0 0 1 0 4.8z"/><path fill="#fff" d="M42 36.2c-7.6 0-13.8 5-13.8 11.2S34.4 58.6 42 58.6c1.8 0 3.6-.3 5.2-.9l4.6 2.4-1.1-3.9c3.1-2.1 5.1-5.3 5.1-8.8 0-6.2-6.2-11.2-13.8-11.2z"/><path fill="#07c160" d="M37.5 46.1a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6zm9.2 0a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z"/></svg>',
+      fallback: 'WX'
+    },
+    {
+      key: 'bilibili',
+      label: 'B站',
+      id: '341994935',
+      href: 'https://space.bilibili.com/341994935',
+      logo: 'https://www.bilibili.com/favicon.ico',
+      fallback: 'B'
+    },
+    {
+      key: 'douyin',
+      label: '抖音',
+      id: '21693668371',
+      copy: '21693668371',
+      logo: 'https://www.douyin.com/favicon.ico',
+      fallback: 'DY'
+    },
+    {
+      key: 'xiaohongshu',
+      label: '小红书',
+      id: '64b0cda3000000000a02010f',
+      href: 'https://www.xiaohongshu.com/user/profile/64b0cda3000000000a02010f',
+      logo: 'https://www.xiaohongshu.com/favicon.ico',
+      fallback: 'RED'
+    },
+    {
+      key: 'x',
+      label: 'X',
+      id: '@some_white89751',
+      href: 'https://x.com/some_white89751',
+      logo: 'https://x.com/favicon.ico',
+      fallback: 'X'
+    },
+    {
+      key: 'email',
+      label: '邮箱',
+      id: 'somewhite1210@gmail.com',
+      href: 'mailto:somewhite1210@gmail.com',
+      logo: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico',
+      fallback: 'MAIL'
+    }
+  ];
+
+  const rig = document.getElementById('contactIcons');
+  const frame = rig?.closest('.contact-section-inner');
+  const toast = document.getElementById('copyToast');
+  if (!rig || !frame) return;
+
+  let nodes = [];
+  let active = null;
+  let raf = 0;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2100);
+  }
+
+  function renderRig() {
+    rig.className = 'contact-icons hanging-rig';
+    const lineLayer = socialItems.map(item => `
+      <span class="hanger-line" data-line="${item.key}" aria-hidden="true"></span>
+    `).join('');
+    const tagLayer = socialItems.map(item => {
+      const mark = item.icon || `
+        <img class="official-logo" src="${item.logo}" alt="" draggable="false"
+          onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'badge-mark', textContent: '${item.fallback}'}))">
+      `;
+      return `
+      <div class="hanger" data-social="${item.key}">
+        <button class="contact-icon${item.placeholder ? ' is-placeholder' : ''}" type="button" aria-label="${item.label}">
+          ${mark}
+          <span class="social-id">${item.id}</span>
+        </button>
+      </div>
+    `;
+    }).join('');
+    rig.innerHTML = lineLayer + tagLayer;
+
+    nodes = [...rig.querySelectorAll('.hanger')].map((el, index) => ({
+      el,
+      button: el.querySelector('.contact-icon'),
+      item: socialItems[index],
+      line: rig.querySelector(`[data-line="${socialItems[index].key}"]`),
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      anchorX: 0,
+      anchorY: 58,
+      restX: 0,
+      restY: 0,
+      w: 112,
+      h: 118,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      offsetX: 0,
+      offsetY: 0,
+      dragged: false
+    }));
+
+    nodes.forEach(bindNode);
+    layoutRig();
+    if (!reducedMotion) startPhysics();
+  }
+
+  function layoutRig() {
+    const rect = frame.getBoundingClientRect();
+    const mobile = rect.width < 620;
+    const cols = mobile ? 2 : socialItems.length;
+    const tagW = mobile ? 96 : 112;
+    const tagH = mobile ? 106 : 118;
+    const anchorInset = mobile ? 58 : 86;
+    const usable = Math.max(1, rect.width - anchorInset * 2);
+    const gap = cols === 1 ? 0 : usable / (cols - 1);
+
+    nodes.forEach((node, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const anchorX = anchorInset + col * gap;
+      const anchorY = 58;
+      const restX = Math.min(rect.width - tagW - 18, Math.max(18, anchorX - tagW / 2));
+      const restY = mobile ? 166 + row * 146 : 194 + (index % 2) * 36;
+
+      node.w = tagW;
+      node.h = tagH;
+      node.anchorX = anchorX;
+      node.anchorY = anchorY;
+      node.restX = restX;
+      node.restY = restY;
+      node.x = node.x || restX;
+      node.y = node.y || restY;
+      node.el.style.setProperty('--tag-w', `${tagW}px`);
+      node.el.style.setProperty('--tag-h', `${tagH}px`);
+
+      if (reducedMotion) {
+        node.x = restX;
+        node.y = restY;
+        node.vx = 0;
+        node.vy = 0;
+      }
+      applyNode(node);
+    });
+  }
+
+  function bindNode(node) {
+    node.button.addEventListener('pointerdown', event => {
+      if (reducedMotion) return;
+      event.preventDefault();
+      node.pointerId = event.pointerId;
+      node.startX = event.clientX;
+      node.startY = event.clientY;
+      node.offsetX = event.clientX - node.x;
+      node.offsetY = event.clientY - node.y;
+      node.dragged = false;
+      active = node;
+      node.el.classList.add('dragging');
+      node.button.setPointerCapture(event.pointerId);
+    });
+
+    node.button.addEventListener('pointermove', event => {
+      if (active !== node || node.pointerId !== event.pointerId) return;
+      const rect = frame.getBoundingClientRect();
+      const nextX = event.clientX - node.offsetX;
+      const nextY = event.clientY - node.offsetY;
+      const prevX = node.x;
+      const prevY = node.y;
+      node.x = Math.min(rect.width - node.w - 12, Math.max(12, nextX));
+      node.y = Math.min(rect.height - node.h - 12, Math.max(88, nextY));
+      node.vx = node.x - prevX;
+      node.vy = node.y - prevY;
+      if (Math.hypot(event.clientX - node.startX, event.clientY - node.startY) > 8) {
+        node.dragged = true;
+      }
+      applyNode(node);
+    });
+
+    node.button.addEventListener('pointerup', event => finishPointer(node, event));
+    node.button.addEventListener('pointercancel', event => finishPointer(node, event, true));
+    node.button.addEventListener('click', event => event.preventDefault());
+  }
+
+  function finishPointer(node, event, cancelled = false) {
+    if (node.pointerId !== event.pointerId) return;
+    node.button.releasePointerCapture(event.pointerId);
+    node.el.classList.remove('dragging');
+    node.pointerId = null;
+    active = null;
+    if (!cancelled && !node.dragged) activateItem(node.item);
+  }
+
+  async function activateItem(item) {
+    if (item.placeholder) {
+      showToast(`${item.label}账号待补充`);
+      return;
+    }
+    if (item.copy) {
+      try {
+        await navigator.clipboard.writeText(item.copy);
+        showToast(`${item.label}已复制：${item.copy}`);
+      } catch {
+        showToast(`${item.label}：${item.copy}`);
+      }
+      return;
+    }
+    if (item.href?.startsWith('mailto:')) {
+      window.location.href = item.href;
+      return;
+    }
+    if (item.href) {
+      window.open(item.href, '_blank', 'noopener');
+    }
+  }
+
+  function startPhysics() {
+    cancelAnimationFrame(raf);
+    const step = () => {
+      const rect = frame.getBoundingClientRect();
+      for (const node of nodes) {
+        if (node !== active) {
+          const springX = (node.restX - node.x) * 0.018;
+          const springY = (node.restY - node.y) * 0.022;
+          node.vx = (node.vx + springX) * 0.91;
+          node.vy = (node.vy + springY + 0.08) * 0.91;
+          node.x += node.vx;
+          node.y += node.vy;
+        }
+      }
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          separate(nodes[i], nodes[j]);
+        }
+      }
+
+      for (const node of nodes) {
+        node.x = Math.min(rect.width - node.w - 12, Math.max(12, node.x));
+        node.y = Math.min(rect.height - node.h - 12, Math.max(88, node.y));
+        applyNode(node);
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  function separate(a, b) {
+    const ax = a.x + a.w / 2;
+    const ay = a.y + a.h / 2;
+    const bx = b.x + b.w / 2;
+    const by = b.y + b.h / 2;
+    const minX = (a.w + b.w) * 0.42;
+    const minY = (a.h + b.h) * 0.36;
+    const dx = bx - ax;
+    const dy = by - ay;
+    if (Math.abs(dx) >= minX || Math.abs(dy) >= minY) return;
+
+    const pushX = (minX - Math.abs(dx)) * Math.sign(dx || 1) * 0.018;
+    const pushY = (minY - Math.abs(dy)) * Math.sign(dy || 1) * 0.014;
+    if (a !== active) {
+      a.vx -= pushX;
+      a.vy -= pushY;
+    }
+    if (b !== active) {
+      b.vx += pushX;
+      b.vy += pushY;
+    }
+  }
+
+  function applyNode(node) {
+    const attachX = node.x + node.w / 2;
+    const attachY = node.y + 14;
+    const dx = attachX - node.anchorX;
+    const dy = attachY - node.anchorY;
+    const lineLength = Math.max(28, Math.hypot(dx, dy));
+    const lineAngle = -Math.atan2(dx, dy) * 180 / Math.PI;
+    const tilt = Math.max(-11, Math.min(11, node.vx * 1.2 - lineAngle * 0.08));
+
+    node.el.style.setProperty('--x', `${node.x}px`);
+    node.el.style.setProperty('--y', `${node.y}px`);
+    node.el.style.setProperty('--rot', `${tilt}deg`);
+    node.line.style.setProperty('--line-x', `${node.anchorX}px`);
+    node.line.style.setProperty('--line-y', `${node.anchorY}px`);
+    node.line.style.setProperty('--line-h', `${lineLength}px`);
+    node.line.style.setProperty('--line-rot', `${lineAngle}deg`);
+  }
+
+  renderRig();
+  window.addEventListener('resize', () => {
+    layoutRig();
+  });
+})();
+</script>
+</body>
+</html>
