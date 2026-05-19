@@ -169,6 +169,25 @@ main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding
 }
 .hero-name .accent:hover { transform: translateY(-4px); }
 
+.hero-name .terminal-name {
+  position: relative;
+  display: inline-block;
+  padding-right: 0.18em;
+}
+
+.hero-name .terminal-name::after {
+  content: "";
+  position: absolute;
+  left: calc(100% + 0.04em);
+  bottom: 0.02em;
+  width: 0.055em;
+  height: 0.78em;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green-dim);
+  animation: cursorBlink 1.05s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: opacity;
+}
+
 .hero-role {
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
@@ -498,14 +517,17 @@ canvas#starfield,
 }
 
 .hero::before {
-  content: "READY.";
+  content: "[ ONLINE ]";
   position: absolute;
   top: 1rem;
   right: 1rem;
-  color: var(--green);
+  color: #07110b;
+  background: var(--green);
+  border: 1px solid rgba(244,200,106,0.42);
+  padding: 0.18rem 0.46rem;
   font-size: 0.75rem;
-  letter-spacing: 0.16em;
-  animation: terminalBlink 1.2s steps(2, end) infinite;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 18px rgba(115,255,155,0.22);
 }
 
 .hero-eyebrow,
@@ -780,6 +802,11 @@ canvas#starfield,
   50% { opacity: 0.32; }
 }
 
+@keyframes cursorBlink {
+  0%, 42% { opacity: 1; }
+  58%, 100% { opacity: 0.18; }
+}
+
 @media (max-width: 768px) {
   .crt-shell {
     padding-inline: 0.85rem;
@@ -835,7 +862,7 @@ canvas#starfield,
     <div class="orbital-ring-2"></div>
     <p class="hero-eyebrow">Personal Site</p>
     <h1 class="hero-name">
-      <span class="accent">你好，</span><br>我是 somewhite
+      <span class="accent">你好，</span><br>我是 <span class="terminal-name">somewhite</span>
     </h1>
     <p class="hero-role">
       自由职业者 / 创造者 / 生活在武汉
